@@ -1,0 +1,77 @@
+version: "3.9"
+
+networks:
+  ollama_net:
+    external: true
+
+volumes:
+  nginx_data:
+    driver: local
+
+services:
+#  nginx:
+#    image: nginx:stable
+#    networks:
+#      - ollama_net
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    environment:
+#      - TZ=America/Los_Angeles
+#    volumes:
+#      - nginx_data:/usr/share/nginx/html
+#    deploy:
+#      replicas: 1
+#      restart_policy:
+#        condition: on-failure
+
+  ollama:
+    image: harbor.mt-ss.cdcr.ca.gov/ai/ollama-with-models:amd64
+    networks:
+      - ollama_net
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_FLASH_ATTENTION=true
+      - OLLAMA_HOST=0.0.0.0 
+      - OLLAMA_NUM_THREADS=8
+      - OLLAMA_PORT=11434
+      - TZ=America/Los_Angeles
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  open-webui:
+    image: harbor.mt-ss.cdcr.ca.gov/ai/open-webui/open-webui:main
+    networks:
+      - ollama_net
+    ports:
+      - "8081:8080"
+    environment:
+      - CORS_ALLOW_HEADERS=Content-Type,Authorization
+      - CORS_ALLOW_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - CORS_ALLOW_ORIGIN=*
+      - ENABLE_OLLAMA_API=true
+      - ENABLE_RAG_WEB_LOADER=false
+      - ENABLE_RAG_WEB_SEARCH=false
+      - ENABLE_SIGNUP_PASSWORD_CONFIRMATION=true
+      - ENABLE_SIGNUP=true
+      - ENV=dev
+      - GLOBAL_LOG_LEVEL=DEBUG
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - RAG_EMBEDDING_ENGINE=
+      - RAG_EMBEDDING_MODEL=
+      - RAG_RERANKING_MODEL=
+      - TZ=America/Los_Angeles
+      - USE_EMBEDDING_MODEL_DOCKER=
+      - USE_RERANKING_MODEL_DOCKER=
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
