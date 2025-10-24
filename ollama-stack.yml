@@ -5,6 +5,8 @@ networks:
     external: true
 
 volumes:
+  open_webui_data:
+    driver: local
   nginx_data:
     driver: local
 
@@ -40,7 +42,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
-      replicas: 1
+      replicas: 2
       restart_policy:
         condition: on-failure
 
@@ -70,6 +72,7 @@ services:
       - USE_RERANKING_MODEL_DOCKER=
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - open_webui_data:/app/backend/data
     deploy:
       replicas: 1
       restart_policy:
