@@ -36,7 +36,8 @@ services:
     environment:
       - OLLAMA_FLASH_ATTENTION=true
       - OLLAMA_HOST=0.0.0.0 
-      - OLLAMA_NUM_THREADS=8
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_NUM_THREADS=32
       - OLLAMA_PORT=11434
       - TZ=America/Los_Angeles
     volumes:
@@ -67,6 +68,7 @@ services:
       - RAG_EMBEDDING_ENGINE=
       - RAG_EMBEDDING_MODEL=
       - RAG_RERANKING_MODEL=
+      - THREAD_POOL_SIZE=8
       - TZ=America/Los_Angeles
       - USE_EMBEDDING_MODEL_DOCKER=
       - USE_RERANKING_MODEL_DOCKER=
