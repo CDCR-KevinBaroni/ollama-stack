@@ -26,6 +26,9 @@ services:
 #      replicas: 1
 #      restart_policy:
 #        condition: on-failure
+#
+      # - OLLAMA_NUM_PARALLEL=2
+      # - OLLAMA_KV_CACHE_TYPE=f16
 
   ollama:
     image: harbor.mt-ss.cdcr.ca.gov/ai/ollama-with-models:amd64
@@ -34,16 +37,20 @@ services:
     ports:
       - "11434:11434"
     environment:
+      - OLLAMA_DEBUG=0
       - OLLAMA_FLASH_ATTENTION=true
       - OLLAMA_HOST=0.0.0.0 
-      - OLLAMA_NUM_PARALLEL=2
-      - OLLAMA_NUM_THREADS=32
+      - OLLAMA_KEEP_ALIVE=10m
+      - OLLAMA_KV_CACHE_TYPE=q4_0
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_NUM_THREADS=30
       - OLLAMA_PORT=11434
       - TZ=America/Los_Angeles
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
 
@@ -68,7 +75,7 @@ services:
       - RAG_EMBEDDING_ENGINE=
       - RAG_EMBEDDING_MODEL=
       - RAG_RERANKING_MODEL=
-      - THREAD_POOL_SIZE=8
+      - THREAD_POOL_SIZE=40
       - TZ=America/Los_Angeles
       - USE_EMBEDDING_MODEL_DOCKER=
       - USE_RERANKING_MODEL_DOCKER=
