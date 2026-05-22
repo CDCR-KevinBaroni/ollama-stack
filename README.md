@@ -8,7 +8,7 @@ Swarm initialized: current node (rl0596bcajjqu4y9cyfi6eoqk) is now a manager.
 
 To add a worker to this swarm, run the following command:
 
-    docker swarm join --token REDACTED
+    docker swarm join --token SWMTKN-1-4v8y96x2tqnr9yqafwblb920nk3voc484qybhv27fmu1gongux-0q10wz1ugoxwbagau7p7xpot9 192.168.88.104:2377
 
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 #
@@ -33,14 +33,14 @@ sudo firewall-cmd --reload
 docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 
 3. 	Prepare persistent volumes
-sudo mkdir -p /testdata/ollama_stack/ollama/data
-sudo chmod -R 777 /testdata/ollama_stack/ollama/data
+sudo mkdir -p /var/ollama_stack/ollama/data
+sudo chmod -R 777 /var/ollama_stack/ollama/data
 #
-sudo mkdir -p /testdata/ollama_stack/open-webui
-sudo chmod -R 777 /testdata/ollama_stack/open-webui
+sudo mkdir -p /var/ollama_stack/open-webui
+sudo chmod -R 777 /var/ollama_stack/open-webui
 #
-sudo mkdir -p /testdata/ollama_stack/nginx
-sudo chmod -R 777 /testdata/ollama_stack/nginx
+sudo mkdir -p /var/ollama_stack/nginx
+sudo chmod -R 777 /var/ollama_stack/nginx
 
 
 4. Create ollama_stack.yml:
@@ -277,9 +277,9 @@ docker push harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:24.04
 docker push harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:amd64
 
       # Persist Ollama state
-      - /testdata/ollama_stack/ollama/state_data:/root/.ollama
+      - /var/ollama_stack/ollama/state_data:/root/.ollama
       # Map host model directory
-      - /testdata/ollama_stack/ollama/models:/root/.ollama/models
+      - /var/ollama_stack/ollama/models:/root/.ollama/models
 
 
 HTTP_PROXY=http://agency-proxy.lb.cdcr.ca.gov:8080/
@@ -344,11 +344,11 @@ https://gist.github.com/kwame-mintah/7ffd62d13f7e82318dd62d097a1f3608
 
 # Start the Ollama listener
 export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+export OLLAMA_MODELS=/var/ollama_stack/ollama/models
 ollama serve
 # Conservative
 export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+export OLLAMA_MODELS=/var/ollama_stack/ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_NUM_THREADS=1
 export OLLAMA_MAX_LOADED_MODELS=1
@@ -357,7 +357,7 @@ export OLLAMA_DEBUG=1
 ollama serve
 # Multithreaded fast quadrent
 export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+export OLLAMA_MODELS=/var/ollama_stack/ollama/models
 export OLLAMA_FLASH_ATTENTION=1
 export OLLAMA_KEEP_ALIVE=10m
 # Supports standard kv cache quantization formats like f16 and 
@@ -410,7 +410,7 @@ sudo tar --create --recursion --gzip --verbose --file=${folderName}.gz.tar ${fol
 folderName=ollama_models
 tar -tf ${folderName}.gz.tar
 # Extract/Decompress a compressed archive
-cd /testdata/ollama/.ollama/
+cd /var/ollama/.ollama/
 folderName=ollama_models
 sudo tar --extract --gunzip --verbose --file=${folderName}.gz.tar
 

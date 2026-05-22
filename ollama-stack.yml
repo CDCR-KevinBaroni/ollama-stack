@@ -26,21 +26,18 @@ services:
   #       condition: on-failure
 
   ollama:
-    image: harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:latest
+    image: ollama/ollama:latest
     networks:
       - ollama_net
     ports:
       - "11434:11434"
     # OLLAMA_KV_CACHE_TYPE values q4_0, q4_1, q5_0, q5_1, q8_0, f16
-      # - HTTP_PROXY=http://agency-proxy.lb.cdcr.ca.gov:8080/
-      # - HTTPS_PROXY=http://agency-proxy.lb.cdcr.ca.gov:8080/
-      # - NO_PROXY=ollama,10.124.131.251,10.124.130.121,cdcr.ca.gov,*.cdcr.ca.gov,localhost,127.0.0.0/24,10.0.0.0/8,153.48.0.0/16,172.0.0.0/8,192.168.0.0/16 ::1
     environment:
       - OLLAMA_DEBUG=0
       - OLLAMA_FLASH_ATTENTION=true
       - OLLAMA_HOST=0.0.0.0 
       - OLLAMA_KEEP_ALIVE=10m
-      - OLLAMA_KV_CACHE_TYPE=q4_0
+      - OLLAMA_KV_CACHE_TYPE=f16
       - OLLAMA_MAX_LOADED_MODELS=4
       - OLLAMA_NUM_PARALLEL=4
       - OLLAMA_NUM_THREADS=32
@@ -79,14 +76,14 @@ services:
         condition: on-failure
       resources:
         limits:
-          cpus: "24.0"
-          memory: 96G
+          cpus: "8.0"
+          memory: 32G
         reservations:
-          cpus: "16.0"
-          memory: 64G
+          cpus: "4.0"
+          memory: 16G
 
   open-webui:
-    image: harbor.mt-ss.cdcr.ca.gov/ai/open-webui/open-webui:latest
+    image: ghcr.io/open-webui/open-webui:main
     networks:
       - ollama_net
     ports:
@@ -104,9 +101,6 @@ services:
       - ENABLE_SIGNUP=true
       - ENV=dev
       - GLOBAL_LOG_LEVEL=INFO
-      - http_proxy=http://agency-proxy.lb.cdcr.ca.gov:8080/
-      - https_proxy=http://agency-proxy.lb.cdcr.ca.gov:8080/
-      - no_proxy=ollama,10.124.131.251,10.124.130.121,cdcr.ca.gov,*.cdcr.ca.gov,localhost,127.0.0.0/24,10.0.0.0/8,153.48.0.0/16,172.0.0.0/8,192.168.0.0/16 ::1
       - OLLAMA_BASE_URL=http://ollama:11434
       - RAG_EMBEDDING_ENGINE=
       - RAG_EMBEDDING_MODEL=
