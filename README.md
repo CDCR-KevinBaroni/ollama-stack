@@ -338,6 +338,38 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3yretxf29MFrIJ3wiU/S9YCJL5J8l7bsEwTeTpHSUh
 
 Error: listen tcp 127.0.0.1:11434: bind: address already in use
 ---
+Environment Variables for Ollama
+https://gist.github.com/kwame-mintah/7ffd62d13f7e82318dd62d097a1f3608
+
+
+# Start the Ollama listener
+export OLLAMA_HOST=127.0.0.1:11500
+export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+ollama serve
+# Conservative
+export OLLAMA_HOST=127.0.0.1:11500
+export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+export OLLAMA_NUM_PARALLEL=1
+export OLLAMA_NUM_THREADS=1
+export OLLAMA_MAX_LOADED_MODELS=1
+export OLLAMA_KEEP_ALIVE=0
+export OLLAMA_DEBUG=1
+ollama serve
+# Multithreaded fast quadrent
+export OLLAMA_HOST=127.0.0.1:11500
+export OLLAMA_MODELS=/testdata/ollama_stack/ollama/models
+export OLLAMA_FLASH_ATTENTION=1
+export OLLAMA_KEEP_ALIVE=10m
+# Supports standard kv cache quantization formats like f16 and 
+# (if built with kv cache quantization enabled) q4_0, q4_1, q5_0, q5_1, q8_0.
+export OLLAMA_KV_CACHE_TYPE=q4_0
+export OLLAMA_MAX_LOADED_MODELS=1
+export OLLAMA_MAX_QUEUE=32
+export OLLAMA_NUM_PARALLEL=4
+export OLLAMA_NUM_THREADS=32
+ollama serve
+
+---
 sudo systemctl stop ollama
 #
 sudo vi /etc/systemd/system/ollama.service
