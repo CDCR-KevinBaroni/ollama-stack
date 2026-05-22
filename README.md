@@ -8,7 +8,7 @@ Swarm initialized: current node (rl0596bcajjqu4y9cyfi6eoqk) is now a manager.
 
 To add a worker to this swarm, run the following command:
 
-    docker swarm join --token SWMTKN-1-0mbadiyxe5bhqg6if71p9uy6vfkaxfec1q0hui599sner4alhs-6hyt5p23olvoya3v3f99xxd4f 10.124.131.250:2377
+    docker swarm join --token REDACTED
 
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 #
@@ -30,7 +30,7 @@ sudo firewall-cmd --zone=public --add-port=11434/tcp --permanent
 sudo firewall-cmd --reload
 
 # via curl on the Docker Registry VM:
-docker login harbor.mt-ss.cdcr.ca.gov --username admin --password 99752d89709112b0bc87e353ef70c542
+docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 
 3. 	Prepare persistent volumes
 sudo mkdir -p /testdata/ollama_stack/ollama/data
@@ -334,7 +334,7 @@ $ ollama
 ---
 Your new public key is: 
 
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3yretxf29MFrIJ3wiU/S9YCJL5J8l7bsEwTeTpHSUh
+ssh-ed25519 REDACTED
 
 Error: listen tcp 127.0.0.1:11434: bind: address already in use
 ---
@@ -387,7 +387,7 @@ sudo systemctl status ollama
 ---
 Your new public key is: 
 
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3yretxf29MFrIJ3wiU/S9YCJL5J8l7bsEwTeTpHSUh
+ssh-ed25519 REDACTED
 
 Error: listen tcp 127.0.0.1:11434: bind: address already in use
 
