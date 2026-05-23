@@ -50,17 +50,8 @@ services:
       [
         "/bin/ollama serve & \
          sleep 5 && \
-         /bin/ollama pull llama3.2:3b && \
-         /bin/ollama pull codellama:7b && \
-         /bin/ollama pull mistral:7b && \
-         /bin/ollama pull deepseek-r1:8b && \
-         /bin/ollama pull llama3.1:8b && \
-         /bin/ollama pull qwen3.5:9b && \
          /bin/ollama run llama3.2:3b --keepalive 1440m >/dev/null 2>&1 & \
-         /bin/ollama run codellama:7b --keepalive 1440m >/dev/null 2>&1 & \
-         /bin/ollama run mistral:7b --keepalive 1440m >/dev/null 2>&1 & \
          /bin/ollama run deepseek-r1:8b --keepalive 1440m >/dev/null 2>&1 & \
-         /bin/ollama run llama3.1:8b --keepalive 1440m >/dev/null 2>&1 & \
          /bin/ollama run qwen3.5:9b --keepalive 1440m >/dev/null 2>&1 & \
          wait"
       ]
