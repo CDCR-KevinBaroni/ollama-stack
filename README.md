@@ -1,6 +1,7 @@
 # ollama-stack
 
 1. Initialize Swarm (single node)
+
 ```
    docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
 
@@ -20,7 +21,8 @@ docker node ls
 #
 ```
 
-2.         Create overlay network
+2.          Create overlay network
+
 ```
 docker network create --driver overlay --attachable ollama_net
 
@@ -42,7 +44,8 @@ sudo firewall-cmd --reload
 docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 ```
 
-3.         Prepare persistent volumes
+3.          Prepare persistent volumes
+
 ```
 sudo mkdir -p /var/ollama_stack/ollama/data
 sudo chmod -R 777 /var/ollama_stack/ollama/data
@@ -57,6 +60,7 @@ sudo chmod -R 777 /var/ollama_stack/nginx
 ```
 
 4. Create ollama_stack.yml:
+
 ```
 version: "3.9"
 
@@ -95,7 +99,7 @@ services:
     environment:
       - OLLAMA_DEBUG=0
       - OLLAMA_FLASH_ATTENTION=true
-      - OLLAMA_HOST=0.0.0.0 
+      - OLLAMA_HOST=0.0.0.0
       - OLLAMA_KEEP_ALIVE=10m
       - OLLAMA_KV_CACHE_TYPE=f16
       - OLLAMA_MAX_LOADED_MODELS=4
@@ -173,7 +177,7 @@ services:
       - ENABLE_BASE_MODELS_CACHE=true
       - MODELS_CACHE_TTL=300
       - THREAD_POOL_SIZE=42
-      - WEBUI_CONCURRENCY="32"      
+      - WEBUI_CONCURRENCY="32"
       - WEBUI_MAX_REQUESTS="2048"
       - WEBUI_TIMEOUT="120"
       - WEBUI_WORKERS="4"
@@ -192,7 +196,9 @@ services:
           cpus: "2.0"
           memory: 4G
 ```
+
 5. Create Lifecycle Bash Scripts:
+
 ```
 touch start_stack.sh
 cat <<EOF | tee start_stack.sh
@@ -242,6 +248,7 @@ rm -rf ollama-stack
 git clone https://github.com/CDCR-KevinBaroni/ollama-stack.git
 
 ```
+
 http://127.0.0.1:8080/
 
 http://127.0.0.1:8080/docs
@@ -257,7 +264,6 @@ http://127.0.0.1/
 http://web-ui.mt-sb.cdcr.ca.gov/
 
 http://web-ui.mt-sb.cdcr.ca.gov/docs
-
 
 ```
 Admin Account
@@ -315,6 +321,7 @@ http://127.0.0.1:8081/
 https://github.com/CDCR-KevinBaroni/ollama_stack
 
 # OLLAMA
+
 ```
 
 docker pull ghcr.io/open-webui/open-webui:main
@@ -336,7 +343,6 @@ kubectl apply -f ollama-deployment.yaml
 
 http://web-ui.mt-sb.cdcr.ca.gov/
 http://web-ui.mt-sb.cdcr.ca.gov/docs
-
 
 ```
 curl -fsSL https://ollama.com/install.sh | sh
@@ -406,7 +412,7 @@ $ ollama
 
 To use kimi-k2.6:cloud, please sign in.
 
-Navigate to:  
+Navigate to:
  https://ollama.com/connect?name=cdcr-ubuntu-dev-vm-2&key=c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUIyV0NrVXd0TGlXZnF5Q1FjTWl2MklNWDVxQ2V5TmN0N1F0RFFxTVhVQXo
 
 ## ⠹ Waiting for sign in to complete...
@@ -456,6 +462,7 @@ ollama serve
 sudo systemctl stop ollama
 
 #
+cat /etc/systemd/system/ollama.service
 sudo vi /etc/systemd/system/ollama.service
 [Service]
 Environment="OLLAMA_HOST=127.0.0.1:11434"
@@ -463,10 +470,6 @@ Environment="OLLAMA_MODELS=/var/ollama_stack/ollama/models"
 #
 sudo systemctl daemon-reload
 sudo systemctl start ollama
-sudo systemctl status ollama
-#
-sudo systemctl daemon-reload
-sudo systemctl restart ollama
 sudo systemctl status ollama
 
 ---
@@ -503,6 +506,7 @@ sudo tar --extract --gunzip --verbose --file=${folderName}.gz.tar
 ```
 
 # Endpoints Blocked
+
 https://registry.ollama.ai/v2/library/llama3.2/manifests/3b
 
 https://ollama.com/api/experimental/model-recommendations
