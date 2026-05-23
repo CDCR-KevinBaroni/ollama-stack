@@ -21,7 +21,7 @@ docker node ls
 #
 ```
 
-2.          Create overlay network
+2.           Create overlay network
 
 ```
 docker network create --driver overlay --attachable ollama_net
@@ -44,7 +44,7 @@ sudo firewall-cmd --reload
 docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 ```
 
-3.          Prepare persistent volumes
+3.           Prepare persistent volumes
 
 ```
 sudo mkdir -p /var/ollama_stack/ollama/data
@@ -512,3 +512,7 @@ https://registry.ollama.ai/v2/library/llama3.2/manifests/3b
 https://ollama.com/api/experimental/model-recommendations
 
 https://ollama.com/api/tags?ts=1778722790
+
+```
+nodeType=$(docker node inspect self | jq .[].Spec.Role | tr -d '"')
+```
