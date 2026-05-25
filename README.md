@@ -6,6 +6,16 @@
    docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
 
 #
+cdcr@KABC-DEV-MINI  ~/ollama-stack
+ docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+Swarm initialized: current node (uv98qel4xzhqqbl0jzulj3tld) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-2y63fjipt12i28jiy64fpubvew6yql6rvkjbn5pdsc0u6jn6q9-ei8vrwhj9kggryukhhau76vkc 172.17.36.111:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
 $ docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
 Swarm initialized: current node (rl0596bcajjqu4y9cyfi6eoqk) is now a manager.
 
@@ -47,16 +57,16 @@ docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 3.           Prepare persistent volumes
 
 ```bash
-sudo mkdir -p /var/ollama_stack/ollama/data
-sudo chmod -R 777 /var/ollama_stack/ollama/data
-sudo mkdir -p /var/ollama_stack/ollama/models
-sudo chmod -R 777 /var/ollama_stack/ollama/models
+sudo mkdir -p /mnt/d/ollama_stack/ollama/data
+sudo chmod -R 777 /mnt/d/ollama_stack/ollama/data
+sudo mkdir -p /mnt/d/ollama_stack/ollama/models
+sudo chmod -R 777 /mnt/d/ollama_stack/ollama/models
 #
-sudo mkdir -p /var/ollama_stack/open-webui
-sudo chmod -R 777 /var/ollama_stack/open-webui
+sudo mkdir -p /mnt/d/ollama_stack/open-webui
+sudo chmod -R 777 /mnt/d/ollama_stack/open-webui
 #
-sudo mkdir -p /var/ollama_stack/nginx
-sudo chmod -R 777 /var/ollama_stack/nginx
+sudo mkdir -p /mnt/d/ollama_stack/nginx
+sudo chmod -R 777 /mnt/d/ollama_stack/nginx
 ```
 
 4. Create ollama_stack.yml:
@@ -83,7 +93,7 @@ services:
   #     # Nginx config
   #     - /home/midtier/ollama-stack/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
   #     # Nginx html files
-  #     - /var/ollama_stack/nginx:/usr/share/nginx/html
+  #     - /mnt/d/ollama_stack/nginx:/usr/share/nginx/html
   #   deploy:
   #     replicas: 1
   #     restart_policy:
@@ -131,9 +141,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # Persist Ollama state
-      - /var/ollama_stack/ollama/data:/root/.ollama
+      - /mnt/d/ollama_stack/ollama/data:/root/.ollama
       # Persistent models
-      - /var/ollama_stack/ollama/models:/root/.ollama/models
+      - /mnt/d/ollama_stack/ollama/models:/root/.ollama/models
     deploy:
       replicas: 1
       restart_policy:
@@ -183,7 +193,7 @@ services:
       - WEBUI_WORKERS="4"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/ollama_stack/open-webui:/app/backend/data
+      - /mnt/d/ollama_stack/open-webui:/app/backend/data
     deploy:
       replicas: 1
       restart_policy:
@@ -368,9 +378,9 @@ docker push harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:24.04
 docker push harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:amd64
 
       # Persist Ollama state
-      - /var/ollama_stack/ollama/state_data:/root/.ollama
+      - /mnt/d/ollama_stack/ollama/state_data:/root/.ollama
       # Map host model directory
-      - /var/ollama_stack/ollama/models:/root/.ollama/models
+      - /mnt/d/ollama_stack/ollama/models:/root/.ollama/models
 
 HTTP*PROXY=http://agency-proxy.lb.cdcr.ca.gov:8080/
 http_proxy=http://agency-proxy.lb.cdcr.ca.gov:8080/
@@ -401,12 +411,12 @@ https://gist.github.com/kwame-mintah/7ffd62d13f7e82318dd62d097a1f3608
 
 # Start the Ollama listener
 export OLLAMA_HOST=127.0.0.1:11434
-export OLLAMA_MODELS=/var/ollama_stack/ollama/models
+export OLLAMA_MODELS=/mnt/d/ollama_stack/ollama/models
 ollama serve
 
 # Conservative
 export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_MODELS=/var/ollama_stack/ollama/models
+export OLLAMA_MODELS=/mnt/d/ollama_stack/ollama/models
 export OLLAMA_NUM_PARALLEL=1
 export OLLAMA_NUM_THREADS=1
 export OLLAMA_MAX_LOADED_MODELS=1
@@ -416,7 +426,7 @@ ollama serve
 
 # Multithreaded fast quadrent
 export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_MODELS=/var/ollama_stack/ollama/models
+export OLLAMA_MODELS=/mnt/d/ollama_stack/ollama/models
 export OLLAMA_FLASH_ATTENTION=1
 export OLLAMA_KEEP_ALIVE=10m
 

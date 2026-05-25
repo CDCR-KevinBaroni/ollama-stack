@@ -184,7 +184,7 @@ sudo vi /etc/systemd/system/ollama.service
 ```properties
 [Service]
 Environment="OLLAMA_HOST=127.0.0.1:11434"
-Environment="OLLAMA_MODELS=/var/ollama_stack/ollama/models"
+Environment="OLLAMA_MODELS=/mnt/d/ollama_stack/ollama/models"
 #
 sudo systemctl daemon-reload
 sudo systemctl start ollama

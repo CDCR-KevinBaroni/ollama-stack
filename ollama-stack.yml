@@ -19,7 +19,7 @@ services:
   #     # Nginx config
   #     - /home/midtier/ollama-stack/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
   #     # Nginx html files
-  #     - /var/ollama_stack/nginx:/usr/share/nginx/html
+  #     - /mnt/d/ollama_stack/nginx:/usr/share/nginx/html
   #   deploy:
   #     replicas: 1
   #     restart_policy:
@@ -40,7 +40,7 @@ services:
       - OLLAMA_KV_CACHE_TYPE=f16
       - OLLAMA_MAX_LOADED_MODELS=4
       - OLLAMA_NUM_PARALLEL=4
-      - OLLAMA_NUM_THREADS=32
+      - OLLAMA_NUM_THREADS=16
       - OLLAMA_ORIGINS="*"
       - OLLAMA_PORT=11434
       - TZ=America/Los_Angeles
@@ -58,19 +58,19 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # Persist Ollama state
-      - /var/ollama_stack/ollama/data:/root/.ollama
+      - /mnt/d/ollama_stack/ollama/data:/root/.ollama
       # Persistent models
-      - /var/ollama_stack/ollama/models:/root/.ollama/models
+      - /mnt/d/ollama_stack/ollama/models:/root/.ollama/models
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
       resources:
         limits:
-          cpus: "8.0"
-          memory: 32G
+          cpus: "16.0"
+          memory: 64G
         reservations:
-          cpus: "4.0"
+          cpus: "8.0"
           memory: 16G
 
   open-webui:
@@ -99,18 +99,18 @@ services:
       - TZ=America/Los_Angeles
       - USE_EMBEDDING_MODEL_DOCKER=
       - USE_RERANKING_MODEL_DOCKER=
-      - WEBUI_NAME=CDCR
+      - WEBUI_NAME="Baroni"
       # Performance tuning settings
       - ENABLE_BASE_MODELS_CACHE=true
       - MODELS_CACHE_TTL=300
       - THREAD_POOL_SIZE=42
-      - WEBUI_CONCURRENCY="32"      
+      - WEBUI_CONCURRENCY="16"      
       - WEBUI_MAX_REQUESTS="2048"
       - WEBUI_TIMEOUT="120"
       - WEBUI_WORKERS="4"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/ollama_stack/open-webui:/app/backend/data
+      - /mnt/d/ollama_stack/open-webui:/app/backend/data
     deploy:
       replicas: 1
       restart_policy:
