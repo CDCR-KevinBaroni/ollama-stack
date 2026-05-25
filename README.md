@@ -2,7 +2,7 @@
 
 1. Initialize Swarm (single node)
 
-```
+```bash
    docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
 
 #
@@ -21,9 +21,9 @@ docker node ls
 #
 ```
 
-2.           Create overlay network
+2. Create overlay network
 
-```
+```bash
 docker network create --driver overlay --attachable ollama_net
 
 #
@@ -46,7 +46,7 @@ docker login harbor.mt-ss.cdcr.ca.gov --username admin --password REDACTED
 
 3.           Prepare persistent volumes
 
-```
+```bash
 sudo mkdir -p /var/ollama_stack/ollama/data
 sudo chmod -R 777 /var/ollama_stack/ollama/data
 sudo mkdir -p /var/ollama_stack/ollama/models
@@ -61,7 +61,7 @@ sudo chmod -R 777 /var/ollama_stack/nginx
 
 4. Create ollama_stack.yml:
 
-```
+```yaml
 version: "3.9"
 
 networks:
@@ -199,7 +199,7 @@ services:
 
 5. Create Lifecycle Bash Scripts:
 
-```
+```bash
 touch start_stack.sh
 cat <<EOF | tee start_stack.sh
 #!/bin/bash
@@ -265,12 +265,14 @@ http://web-ui.mt-sb.cdcr.ca.gov/
 
 http://web-ui.mt-sb.cdcr.ca.gov/docs
 
-```
+```text
 Admin Account
 Name: Kevin Baroni
 Email: kevin.a.baroni@gmail.com
 Password: Password1234
+```
 
+```bash
 curl http://127.0.0.1:11434/api/tags | jq
 curl http://127.0.0.1:11434/api/ps | jq
 curl -X POST http://127.0.0.1:11434/api/show -d '{"name": "llama3.2"}' | jq
@@ -311,19 +313,22 @@ ollama run llama3.2:3b "Why cant humans and dogs breath under water?"
 ---
 
 Ollama Monitor
+
 https://github.com/Xza85hrf/Ollama_monitor
 
 Swarmpit Monitor
+
 http://127.0.0.1:8081/
 
-## https://ollama.com/
+Kevin's Personal Docker Swarm Config for the Ollama Stack
 
 https://github.com/CDCR-KevinBaroni/ollama_stack
 
+
 # OLLAMA
+## https://ollama.com/
 
-```
-
+```bash
 docker pull ghcr.io/open-webui/open-webui:main
 docker tag ghcr.io/open-webui/open-webui:main harbor.mt-ss.cdcr.ca.gov/ai/open-webui/open-webui:main
 docker push harbor.mt-ss.cdcr.ca.gov/ai/open-webui/open-webui:main
@@ -342,9 +347,10 @@ kubectl apply -f ollama-deployment.yaml
 ```
 
 http://web-ui.mt-sb.cdcr.ca.gov/
+
 http://web-ui.mt-sb.cdcr.ca.gov/docs
 
-```
+```bash
 curl -fsSL https://ollama.com/install.sh | sh
 
 docker pull ghcr.io/open-webui/open-webui:latest
@@ -389,40 +395,6 @@ docker run -it --rm \
 harbor.mt-ss.cdcr.ca.gov/ai/ollama-no-models/ollama:amd64 "/bin/ollama serve"
 dcr ollama-test
 
-cdcr:cdcr-ubuntu-dev-vm-2 ~/temp
-$ curl -fsSL https://ollama.com/install.sh | sh
-
-> > > Installing ollama to /usr/local
-> > > [sudo] password for cdcr:
-> > > Downloading ollama-linux-amd64.tar.zst
-> > > ######################################################################## 100.0%
-> > > Creating ollama user...
-> > > Adding ollama user to render group...
-> > > Adding ollama user to video group...
-> > > Adding current user to ollama group...
-> > > Creating ollama systemd service...
-> > > Enabling and starting ollama service...
-> > > Created symlink /etc/systemd/system/default.target.wants/ollama.service → /etc/systemd/system/ollama.service.
-> > > The Ollama API is now available at 127.0.0.1:11434.
-> > > Install complete. Run "ollama" from the command line.
-> > > WARNING: No NVIDIA/AMD GPU detected. Ollama will run in CPU-only mode.
-
-cdcr:cdcr-ubuntu-dev-vm-2 ~/temp
-$ ollama
-
-To use kimi-k2.6:cloud, please sign in.
-
-Navigate to:
- https://ollama.com/connect?name=cdcr-ubuntu-dev-vm-2&key=c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUIyV0NrVXd0TGlXZnF5Q1FjTWl2MklNWDVxQ2V5TmN0N1F0RFFxTVhVQXo
-
-## ⠹ Waiting for sign in to complete...
-
-Your new public key is:
-
-ssh-ed25519 REDACTED
-
-## Error: listen tcp 127.0.0.1:11434: bind: address already in use
-
 
 Environment Variables for Ollama
 https://gist.github.com/kwame-mintah/7ffd62d13f7e82318dd62d097a1f3608
@@ -459,27 +431,6 @@ ollama serve
 
 ---
 
-sudo systemctl stop ollama
-
-#
-cat /etc/systemd/system/ollama.service
-sudo vi /etc/systemd/system/ollama.service
-[Service]
-Environment="OLLAMA_HOST=127.0.0.1:11434"
-Environment="OLLAMA_MODELS=/var/ollama_stack/ollama/models"
-#
-sudo systemctl daemon-reload
-sudo systemctl start ollama
-sudo systemctl status ollama
-
----
-
-Your new public key is:
-
-ssh-ed25519 REDACTED
-
-Error: listen tcp 127.0.0.1:11434: bind: address already in use
-
 ollama pull llama3.2:3b
 ollama pull qwen3.5:9b
 ollama pull mistral:7b
@@ -513,6 +464,6 @@ https://ollama.com/api/experimental/model-recommendations
 
 https://ollama.com/api/tags?ts=1778722790
 
-```
+```bash
 nodeType=$(docker node inspect self | jq .[].Spec.Role | tr -d '"')
 ```
