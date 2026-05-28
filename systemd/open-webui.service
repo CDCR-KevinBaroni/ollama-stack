@@ -1,0 +1,91 @@
+# /etc/systemd/system/open-webui.service
+#
+# Runs Open WebUI from a Python venv installed at /opt/open-webui/venv.
+# Pairs with ollama.service (loopback connection to 127.0.0.1:11434).
+# Secrets (TAVILY_API_KEY, etc.) live in /etc/default/open-webui -- see
+# open-webui.env.example.
+
+[Unit]
+Description=Open WebUI (native, no Docker)
+Documentation=https://docs.openwebui.com/
+After=network-online.target ollama.service
+Wants=network-online.target
+Requires=ollama.service
+
+[Service]
+Type=simple
+User=open-webui
+Group=open-webui
+WorkingDirectory=/var/lib/open-webui
+EnvironmentFile=/etc/default/open-webui
+
+# Backend wiring
+Environment="OLLAMA_BASE_URL=http://127.0.0.1:11434"
+Environment="ENABLE_OLLAMA_API=true"
+Environment="DATA_DIR=/var/lib/open-webui"
+Environment="DEFAULT_MODEL=llama3.2:3b"
+
+# Worker pool: tuned for 2-5 concurrent users. The WebUI is a thin FastAPI
+# front end -- the inference bottleneck is Ollama, not these workers.
+# Oversizing wastes RAM and adds context-switching overhead.
+Environment="WEBUI_WORKERS=2"
+Environment="WEBUI_CONCURRENCY=8"
+Environment="THREAD_POOL_SIZE=16"
+Environment="WEBUI_TIMEOUT=120"
+Environment="WEBUI_MAX_REQUESTS=2048"
+
+# Model list caching
+Environment="ENABLE_BASE_MODELS_CACHE=true"
+Environment="MODELS_CACHE_TTL=300"
+
+# Auth / signup
+Environment="ENABLE_SIGNUP=true"
+Environment="ENABLE_SIGNUP_PASSWORD_CONFIRMATION=true"
+
+# CORS (loopback-only; widen if you front this with nginx on a different host)
+Environment="CORS_ALLOW_ORIGIN=*"
+Environment="CORS_ALLOW_METHODS=GET,POST,PUT,DELETE,OPTIONS"
+Environment="CORS_ALLOW_HEADERS=Content-Type,Authorization"
+
+# Web search via Tavily (TAVILY_API_KEY pulled from EnvironmentFile)
+Environment="ENABLE_WEB_SEARCH=true"
+Environment="ENABLE_RAG_WEB_SEARCH=true"
+Environment="WEB_SEARCH_ENGINE=tavily"
+Environment="ENABLE_RAG_WEB_LOADER=false"
+
+# RAG embedding/reranking intentionally disabled -- known Open WebUI
+# vectorization bug. Re-enable only after testing.
+Environment="RAG_EMBEDDING_ENGINE="
+Environment="RAG_EMBEDDING_MODEL="
+Environment="RAG_RERANKING_MODEL="
+Environment="USE_EMBEDDING_MODEL_DOCKER="
+Environment="USE_RERANKING_MODEL_DOCKER="
+Environment="AUXILIARY_EMBEDDING_MODEL="
+Environment="USE_AUXILIARY_EMBEDDING_MODEL_DOCKER="
+
+# Branding
+Environment="WEBUI_NAME=Baroni"
+Environment="ENV=dev"
+Environment="GLOBAL_LOG_LEVEL=INFO"
+Environment="TZ=America/Los_Angeles"
+
+# Bind to all interfaces on 8080. Restrict via firewall if not desired.
+ExecStart=/opt/open-webui/venv/bin/open-webui serve --host 0.0.0.0 --port 8080
+
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Hardening (best-effort; loosen if you discover something it breaks)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+# Open WebUI writes branding/static files into its own venv at startup
+# (splash.png, favicon.*, custom.css, etc.). Without /opt/open-webui in
+# ReadWritePaths the writes fail with Errno 30 -- look for those errors
+# in `journalctl -u open-webui` if you tighten this further.
+ReadWritePaths=/var/lib/open-webui /opt/open-webui
+
+[Install]
+WantedBy=multi-user.target

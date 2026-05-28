@@ -448,6 +448,13 @@ ollama pull deepseek-r1:8b
 ollama pull llama3.1:8b
 ollama pull codellama:7b
 
+# Load Ollama models pinned in memory
+ollama run llama3.2:3b --keepalive 1440m >/dev/null 2>&1 & \
+ollama run deepseek-r1:8b --keepalive 1440m >/dev/null 2>&1 & \
+ollama run qwen3.5:9b --keepalive 1440m >/dev/null 2>&1 & \
+ollama run llama3.1:8b --keepalive 1440m >/dev/null 2>&1 & \
+wait
+
 ---
 
 ollama pull gemma4:e4b

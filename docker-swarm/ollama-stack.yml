@@ -37,7 +37,7 @@ services:
       - OLLAMA_FLASH_ATTENTION=true
       - OLLAMA_HOST=0.0.0.0 
       - OLLAMA_KEEP_ALIVE=10m
-      - OLLAMA_KV_CACHE_TYPE=f16
+      - OLLAMA_KV_CACHE_TYPE=q4_0
       - OLLAMA_MAX_LOADED_MODELS=4
       - OLLAMA_NUM_PARALLEL=4
       - OLLAMA_NUM_THREADS=16
@@ -93,7 +93,7 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - TZ=America/Los_Angeles
       - USE_RERANKING_MODEL_DOCKER=
-      - WEBUI_NAME="Baroni"
+      - WEBUI_NAME=Baroni
       # Performance tuning settings
       - ENABLE_BASE_MODELS_CACHE=true
       - MODELS_CACHE_TTL=300
@@ -118,12 +118,8 @@ services:
       - USE_EMBEDDING_MODEL_DOCKER=
       - AUXILIARY_EMBEDDING_MODEL=
       - USE_AUXILIARY_EMBEDDING_MODEL_DOCKER=
-      - ENABLE_RAG_WEB_SEARCH=false
+      - ENABLE_RAG_WEB_SEARCH=true
       - ENABLE_RAG_WEB_LOADER=false
-      # Try to eliminate signing key error:
-      - SECRET_KEY=c7f1d9e2a4b8f3c1d7e9b2a6c4f1e3d9c7b2a4d8f1e9c3b7a6d4f2e8c1b9a7
-      - JWT_SECRET_KEY=c7f1d9e2a4b8f3c1d7e9b2a6c4f1e3d9c7b2a4d8f1e9c3b7a6d4f2e8c1b9a7
-      - WEB_SECRET_KEY=c7f1d9e2a4b8f3c1d7e9b2a6c4f1e3d9c7b2a4d8f1e9c3b7a6d4f2e8c1b9a7
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/d/ollama_stack/open-webui:/app/backend/data
