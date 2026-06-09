@@ -38,10 +38,11 @@ services:
       - NO_PROXY=ollama,10.124.131.251,10.124.130.121,cdcr.ca.gov,*.cdcr.ca.gov,localhost,127.0.0.0/24,10.0.0.0/8,153.48.0.0/16,172.0.0.0/8,192.168.0.0/16 ::1
       - OLLAMA_DEBUG=0
       - OLLAMA_FLASH_ATTENTION=true
-      - OLLAMA_HOST=0.0.0.0 
+      - OLLAMA_HOST=127.0.0.1
       - OLLAMA_KEEP_ALIVE=10m
       - OLLAMA_KV_CACHE_TYPE=q4_0
       - OLLAMA_MAX_LOADED_MODELS=4
+      - OLLAMA_NO_CLOUD=true
       - OLLAMA_NUM_PARALLEL=4
       - OLLAMA_NUM_THREADS=32
       - OLLAMA_ORIGINS="*"
@@ -53,17 +54,9 @@ services:
       [
         "/bin/ollama serve & \
          sleep 5 && \
-         /bin/ollama pull llama3.2:3b && \
-         /bin/ollama pull codellama:7b && \
-         /bin/ollama pull mistral:7b && \
-         /bin/ollama pull deepseek-r1:8b && \
-         /bin/ollama pull llama3.1:8b && \
-         /bin/ollama pull qwen3.5:9b && \
          /bin/ollama run llama3.2:3b --keepalive 1440m >/dev/null 2>&1 & \
          /bin/ollama run codellama:7b --keepalive 1440m >/dev/null 2>&1 & \
-         /bin/ollama run mistral:7b --keepalive 1440m >/dev/null 2>&1 & \
          /bin/ollama run deepseek-r1:8b --keepalive 1440m >/dev/null 2>&1 & \
-         /bin/ollama run llama3.1:8b --keepalive 1440m >/dev/null 2>&1 & \
          /bin/ollama run qwen3.5:9b --keepalive 1440m >/dev/null 2>&1 & \
          wait"
       ]
@@ -73,6 +66,12 @@ services:
       - /testdata/ollama_stack/ollama/data:/root/.ollama
       # Persistent models
       - /testdata/ollama_stack/ollama/models:/root/.ollama/models
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     deploy:
       replicas: 1
       restart_policy:
