@@ -237,6 +237,14 @@ sudo systemctl restart ollama ollama-warmup open-webui
 
 # Confirm override is applied
 sudo systemctl cat ollama | grep -E '^(Environment|CPUAffinity)'
+
+# Disable & Stop the Ollama stack (leave installed)
+sudo systemctl disable ollama ollama-warmup open-webui
+sudo systemctl stop ollama ollama-warmup open-webui
+
+# Enable & Start the Ollama stack
+sudo systemctl enable ollama ollama-warmup open-webui
+sudo systemctl start ollama ollama-warmup open-webui
 ```
 
 ## Known issues / open questions
