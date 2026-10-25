@@ -106,15 +106,15 @@ xdg-open http://127.0.0.1:8080                        # Open WebUI loads
 
 These are the load-bearing choices in [ollama.service.d-override.conf](ollama.service.d-override.conf) — change them only with a benchmark to back the change up.
 
-| Setting | Value | Why |
-|---|---|---|
-| (thread count) | auto (= 8) | **There is no `OLLAMA_NUM_THREADS` env var.** Ollama auto-detects from the active CPU set; `CPUAffinity=0-7` below caps it at 8. To force a per-request value, use the API `options.num_thread` field or a Modelfile `PARAMETER num_thread N`. The `tune-threads.sh` script in this folder sweeps that per-request value. |
-| `OLLAMA_NUM_PARALLEL` | 2 | Max concurrent in-flight requests. Higher trades latency for throughput; 2 is conservative for a 2–5 user team. |
-| `OLLAMA_MAX_LOADED_MODELS` | 2 | Two warm models cover most chat traffic. Others swap in on demand and stay warm for `OLLAMA_KEEP_ALIVE`. |
-| `OLLAMA_KEEP_ALIVE` | 30m | Long enough to avoid reload churn between user sessions, short enough to free RAM eventually. The warmup unit pins its 2 preloaded models for 1440m (24h) which overrides this for those specific models. |
-| `OLLAMA_KV_CACHE_TYPE` | q4_0 | ~75% KV-cache RAM savings vs f16 with negligible quality loss. Requires Flash Attention. |
-| `OLLAMA_FLASH_ATTENTION` | true | Required for quantized KV cache; modest win on its own. |
-| `CPUAffinity` | 0-7 | Constrain inference to 8 of 16 logical CPUs. Under WSL2 the P/E hybrid topology is hidden from Linux, so this is a hint to Windows; whether it actually maps to P-cores depends on the Windows hybrid scheduler. Verify with `lscpu --extended` after hardware changes. |
+| Setting                    | Value      | Why                                                                                                                                                                                                                                                                                                                       |
+| -------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (thread count)             | auto (= 8) | **There is no `OLLAMA_NUM_THREADS` env var.** Ollama auto-detects from the active CPU set; `CPUAffinity=0-7` below caps it at 8. To force a per-request value, use the API `options.num_thread` field or a Modelfile `PARAMETER num_thread N`. The `tune-threads.sh` script in this folder sweeps that per-request value. |
+| `OLLAMA_NUM_PARALLEL`      | 2          | Max concurrent in-flight requests. Higher trades latency for throughput; 2 is conservative for a 2–5 user team.                                                                                                                                                                                                           |
+| `OLLAMA_MAX_LOADED_MODELS` | 2          | Two warm models cover most chat traffic. Others swap in on demand and stay warm for `OLLAMA_KEEP_ALIVE`.                                                                                                                                                                                                                  |
+| `OLLAMA_KEEP_ALIVE`        | 30m        | Long enough to avoid reload churn between user sessions, short enough to free RAM eventually. The warmup unit pins its 2 preloaded models for 1440m (24h) which overrides this for those specific models.                                                                                                                 |
+| `OLLAMA_KV_CACHE_TYPE`     | q4_0       | ~75% KV-cache RAM savings vs f16 with negligible quality loss. Requires Flash Attention.                                                                                                                                                                                                                                  |
+| `OLLAMA_FLASH_ATTENTION`   | true       | Required for quantized KV cache; modest win on its own.                                                                                                                                                                                                                                                                   |
+| `CPUAffinity`              | 0-7        | Constrain inference to 8 of 16 logical CPUs. Under WSL2 the P/E hybrid topology is hidden from Linux, so this is a hint to Windows; whether it actually maps to P-cores depends on the Windows hybrid scheduler. Verify with `lscpu --extended` after hardware changes.                                                   |
 
 For Open WebUI ([open-webui.service](open-webui.service)): `WEBUI_WORKERS=2`, `WEBUI_CONCURRENCY=8`, `THREAD_POOL_SIZE=16`. The WebUI is a thin FastAPI front end — the inference bottleneck is Ollama, not these workers. Oversizing wastes RAM.
 
@@ -160,18 +160,18 @@ cd ../docker-swarm && ./start_stack.sh
 
 ## Files in this folder
 
-| File | Purpose |
-|---|---|
-| [ollama.service.d-override.conf](ollama.service.d-override.conf) | Drop-in override (env vars + CPUAffinity) for the upstream `ollama.service`. |
-| [open-webui.service](open-webui.service) | Full systemd unit for Open WebUI running from the venv at `/opt/open-webui/venv`. |
-| [open-webui.env.example](open-webui.env.example) | Template for `/etc/default/open-webui` — fill in secrets here, never in the unit file. |
-| [ollama-warmup.service](ollama-warmup.service) | Oneshot that preloads 3 warm models after Ollama is up. |
-| [install.sh](install.sh) | Idempotent installer: prereq checks, dir creation, copies files into place, daemon-reload, restart units. |
-| [uninstall.sh](uninstall.sh) | Reverses `install.sh`. Preserves user data. |
-| [tune-threads.sh](tune-threads.sh) | Benchmark sweep for per-request thread count. |
-| [MIGRATION.md](MIGRATION.md) | Step-by-step from the Swarm stack to this setup (data preservation, sequencing). |
-| [patches/tavily.py](patches/tavily.py) | Patched Tavily client (vendor-file override — see below). |
-| [patches/apply-tavily-patch.sh](patches/apply-tavily-patch.sh) | Re-applies the Tavily patch after a `pip install -U open-webui`. |
+| File                                                             | Purpose                                                                                                   |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [ollama.service.d-override.conf](ollama.service.d-override.conf) | Drop-in override (env vars + CPUAffinity) for the upstream `ollama.service`.                              |
+| [open-webui.service](open-webui.service)                         | Full systemd unit for Open WebUI running from the venv at `/opt/open-webui/venv`.                         |
+| [open-webui.env.example](open-webui.env.example)                 | Template for `/etc/default/open-webui` — fill in secrets here, never in the unit file.                    |
+| [ollama-warmup.service](ollama-warmup.service)                   | Oneshot that preloads 3 warm models after Ollama is up.                                                   |
+| [install.sh](install.sh)                                         | Idempotent installer: prereq checks, dir creation, copies files into place, daemon-reload, restart units. |
+| [uninstall.sh](uninstall.sh)                                     | Reverses `install.sh`. Preserves user data.                                                               |
+| [tune-threads.sh](tune-threads.sh)                               | Benchmark sweep for per-request thread count.                                                             |
+| [MIGRATION.md](MIGRATION.md)                                     | Step-by-step from the Swarm stack to this setup (data preservation, sequencing).                          |
+| [patches/tavily.py](patches/tavily.py)                           | Patched Tavily client (vendor-file override — see below).                                                 |
+| [patches/apply-tavily-patch.sh](patches/apply-tavily-patch.sh)   | Re-applies the Tavily patch after a `pip install -U open-webui`.                                          |
 
 ## Web search tuning (Tavily + Open WebUI 0.9.x)
 
@@ -179,20 +179,20 @@ This is the part of the configuration that took the most iteration to get right.
 
 ### Final working config (as of 2026-05-27, ~1m50s response, accurate)
 
-| Layer | Setting | Value | Why |
-|---|---|---|---|
-| Chat default model | `DEFAULT_MODEL` env in [open-webui.service](open-webui.service) | `llama3.2:3b` | Bake-off vs mistral:7b: equal accuracy, 2× faster (44 tok/s prefill, 12 tok/s decode). |
-| Task default model | `task.model.default` in webui.db config | `llama3.2:3b` | Open WebUI fires up to 6 LLM calls per chat (query gen, retrieval gen, title, tags, follow_up, main). Routing tasks to the small fast 3B model keeps each one sub-second. |
-| Warm model count | `OLLAMA_MAX_LOADED_MODELS` in override | **3** | Chat + reasoning + task = 3 distinct models. With only 2 slots a task call against llama3.2:3b would evict the chat model and force a reload. |
-| Warm models | [ollama-warmup.service](ollama-warmup.service) | `mistral:7b`, `deepseek-r1:8b`, `llama3.2:3b` | All three pinned with `--keepalive 1440m`. |
-| Function-calling mode | `models.default_params.function_calling` in webui.db | `default` (NOT `native`) | `native` makes Open WebUI pass a 27-tool blob (~8000 tokens) on every chat. Small CPU models can't reliably emit the right tool-call schema; the model just outputs malformed JSON and Open WebUI doesn't execute it. `default` makes Open WebUI pre-fetch search results and inject them into the prompt instead. |
-| Builtin tools blob | `models.default_metadata.capabilities.builtin_tools` | `false` | Belt-and-suspenders against the function-calling trap above. |
-| Tags / follow-up / title | `task.tags.enable`, `task.follow_up.enable`, `task.title.enable` | all `false` | Each fires an extra LLM call after the main response that the user has to wait for. Saves ~12-25s per chat. |
-| Search query rewrite | `task.query.search.enable`, `task.query.retrieval.enable` | both `true` | **Cannot disable** — Open WebUI's `chat_web_search_handler` throws HTTP 400 when off (we tried). The query rewrite IS the entire web search flow. Just route it to the fast task model and live with the ~10s cost. |
-| Tavily result count | `rag.web.search.result_count` (admin panel: "Search Result Count") | **2** | Each query × 2 results × 3 queries = 6 sources before dedupe. Going from 3 → 2 cut ~15s off the main response time. |
-| Tavily params | (vendored patch — see below) | `topic=news, days=3, include_answer=true` | `topic=news` + `days=3` makes Tavily return ONLY dated articles from the last 72h. With `topic=general` the `days` param is silently ignored. `include_answer=true` makes Tavily synthesize a current-state summary which we prepend as a citable `[1]` source. Avoid `search_depth=advanced`: it returns 8× larger snippet payloads which on CPU inference adds 1-2 minutes of prefill. |
-| Bypass Web Loader | admin panel toggle (`rag.web.search.bypass_web_loader`) | **ON** | Skips fetching the full body of each result URL. Without this Open WebUI injects ~10-15k tokens of page content per chat. |
-| Bypass Embedding and Retrieval | admin panel toggle (`rag.web.search.bypass_embedding_and_retrieval`) | **ON** | Skips RAG embedding/reranking. We disable RAG embedding entirely (see Open WebUI vectorization bug below), so this just makes that an explicit no-op. |
+| Layer                          | Setting                                                              | Value                                         | Why                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------ | -------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Chat default model             | `DEFAULT_MODEL` env in [open-webui.service](open-webui.service)      | `llama3.2:3b`                                 | Bake-off vs mistral:7b: equal accuracy, 2× faster (44 tok/s prefill, 12 tok/s decode).                                                                                                                                                                                                                                                                                                   |
+| Task default model             | `task.model.default` in webui.db config                              | `llama3.2:3b`                                 | Open WebUI fires up to 6 LLM calls per chat (query gen, retrieval gen, title, tags, follow_up, main). Routing tasks to the small fast 3B model keeps each one sub-second.                                                                                                                                                                                                                |
+| Warm model count               | `OLLAMA_MAX_LOADED_MODELS` in override                               | **3**                                         | Chat + reasoning + task = 3 distinct models. With only 2 slots a task call against llama3.2:3b would evict the chat model and force a reload.                                                                                                                                                                                                                                            |
+| Warm models                    | [ollama-warmup.service](ollama-warmup.service)                       | `mistral:7b`, `deepseek-r1:8b`, `llama3.2:3b` | All three pinned with `--keepalive 1440m`.                                                                                                                                                                                                                                                                                                                                               |
+| Function-calling mode          | `models.default_params.function_calling` in webui.db                 | `default` (NOT `native`)                      | `native` makes Open WebUI pass a 27-tool blob (~8000 tokens) on every chat. Small CPU models can't reliably emit the right tool-call schema; the model just outputs malformed JSON and Open WebUI doesn't execute it. `default` makes Open WebUI pre-fetch search results and inject them into the prompt instead.                                                                       |
+| Builtin tools blob             | `models.default_metadata.capabilities.builtin_tools`                 | `false`                                       | Belt-and-suspenders against the function-calling trap above.                                                                                                                                                                                                                                                                                                                             |
+| Tags / follow-up / title       | `task.tags.enable`, `task.follow_up.enable`, `task.title.enable`     | all `false`                                   | Each fires an extra LLM call after the main response that the user has to wait for. Saves ~12-25s per chat.                                                                                                                                                                                                                                                                              |
+| Search query rewrite           | `task.query.search.enable`, `task.query.retrieval.enable`            | both `true`                                   | **Cannot disable** — Open WebUI's `chat_web_search_handler` throws HTTP 400 when off (we tried). The query rewrite IS the entire web search flow. Just route it to the fast task model and live with the ~10s cost.                                                                                                                                                                      |
+| Tavily result count            | `rag.web.search.result_count` (admin panel: "Search Result Count")   | **2**                                         | Each query × 2 results × 3 queries = 6 sources before dedupe. Going from 3 → 2 cut ~15s off the main response time.                                                                                                                                                                                                                                                                      |
+| Tavily params                  | (vendored patch — see below)                                         | `topic=news, days=3, include_answer=true`     | `topic=news` + `days=3` makes Tavily return ONLY dated articles from the last 72h. With `topic=general` the `days` param is silently ignored. `include_answer=true` makes Tavily synthesize a current-state summary which we prepend as a citable `[1]` source. Avoid `search_depth=advanced`: it returns 8× larger snippet payloads which on CPU inference adds 1-2 minutes of prefill. |
+| Bypass Web Loader              | admin panel toggle (`rag.web.search.bypass_web_loader`)              | **ON**                                        | Skips fetching the full body of each result URL. Without this Open WebUI injects ~10-15k tokens of page content per chat.                                                                                                                                                                                                                                                                |
+| Bypass Embedding and Retrieval | admin panel toggle (`rag.web.search.bypass_embedding_and_retrieval`) | **ON**                                        | Skips RAG embedding/reranking. We disable RAG embedding entirely (see Open WebUI vectorization bug below), so this just makes that an explicit no-op.                                                                                                                                                                                                                                    |
 
 ### Vendor patch to Tavily client
 
@@ -239,8 +239,8 @@ sudo systemctl restart ollama ollama-warmup open-webui
 sudo systemctl cat ollama | grep -E '^(Environment|CPUAffinity)'
 
 # Disable & Stop the Ollama stack (leave installed)
-sudo systemctl disable ollama ollama-warmup open-webui
 sudo systemctl stop ollama ollama-warmup open-webui
+sudo systemctl disable ollama ollama-warmup open-webui
 
 # Enable & Start the Ollama stack
 sudo systemctl enable ollama ollama-warmup open-webui

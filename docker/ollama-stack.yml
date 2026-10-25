@@ -1,0 +1,159 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    # networks:
+    #   - ollama_net
+    ports:
+      # Unauthenticated: loopback only (FU1).
+      - "0.0.0.0:11434:11434"
+      - "0.0.0.0:51434:11434"
+    # OLLAMA_KV_CACHE_TYPE values q4_0, q4_1, q5_0, q5_1, q8_0, f16
+    environment:
+      OLLAMA_CONTEXT_LENGTH: 32768
+      OLLAMA_DEBUG: 0
+      OLLAMA_FLASH_ATTENTION: true
+      OLLAMA_HOST: 0.0.0.0
+      OLLAMA_KEEP_ALIVE: 1440m
+      OLLAMA_KV_CACHE_TYPE: q4_0
+      OLLAMA_MAX_LOADED_MODELS: 2
+      OLLAMA_NO_CLOUD: true
+      OLLAMA_NUM_PARALLEL: 2
+      OLLAMA_NUM_THREADS: 16
+      OLLAMA_ORIGINS: "*"
+      OLLAMA_PORT: 11434
+      TZ: America/Los_Angeles
+    # This preloads multiple models sets the default model in the first "ollama run" statement
+    entrypoint: ["/bin/bash", "-c"]
+    command: [
+        "/bin/ollama serve & \
+        sleep 5 && \
+        /bin/ollama run llama3.1:8b  --keepalive 1440m >/dev/null 2>&1 & \
+        wait",
+      ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persist Ollama state
+      - /var/ollama_stack/ollama//data:/root/.ollama
+      # Persistent models
+      - /var/ollama_stack/ollama//models:/root/.ollama/models
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "8.0"
+          memory: 32G
+        reservations:
+          cpus: "2.0"
+          memory: 16G
+
+  # open-webui:
+  #   image: ghcr.io/open-webui/open-webui:main
+  #   # networks:
+  #   #   - ollama_net
+  #   ports:
+  #     # - "80:8080"
+  #     - "8080:8080"
+  #   env_file:
+  #     - .env.open-webui
+  #   environment:
+  #     ## --Backend wiring ---
+  #     OLLAMA_BASE_URL: "http://ollama:51434"
+  #     ENABLE_OLLAMA_API: true
+  #     DEFAULT_MODEL: "llama3.1:8b"
+  #     # DATA_DIR: "/var/lib/open-webui"
+
+  #     ## CORS (loopback-only; widen if you front this with nginx on a different host)
+  #     CORS_ALLOW_HEADERS: "Content-Type,Authorization"
+  #     CORS_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+  #     CORS_ALLOW_ORIGIN: "*"
+
+  #     ## --Branding ---
+  #     WEBUI_NAME: "Baroni"
+  #     ENV: "dev"
+  #     GLOBAL_LOG_LEVEL: INFO
+  #     TZ: "America/Los_Angeles"
+
+  #     ## --Performance tuning settings ---
+  #     # Worker pool: tuned for 2-5 concurrent users. The WebUI is a thin FastAPI
+  #     # front end -- the inference bottleneck is Ollama, not these workers.
+  #     # Oversizing wastes RAM and adds context-switching overhead.
+  #     ## Worker pool settings
+  #     WEBUI_WORKERS: "2"
+  #     WEBUI_CONCURRENCY: "8"
+  #     THREAD_POOL_SIZE: 16
+  #     WEBUI_TIMEOUT: "120"
+  #     WEBUI_MAX_REQUESTS: "2048"
+  #     # Model list caching
+  #     ENABLE_BASE_MODELS_CACHE: true
+  #     MODELS_CACHE_TTL: 300
+
+  #     ## --Auth / signup ---
+  #     ENABLE_SIGNUP_PASSWORD_CONFIRMATION: true
+  #     ENABLE_SIGNUP: true
+
+  #     ## --Enable Web Search ---
+  #     ENABLE_WEB_SEARCH: true
+  #     # Enable Agents + RAG
+  #     WEB_SEARCH_ENGINE: "tavily"
+  #     # WEB_SEARCH_ENGINE: "google_cse"
+  #     # Tavily Custom Search Engine & API Key
+  #     TAVILY_API_KEY: ${TAVILY_API_KEY}
+  #     # --Google Custom Search Engine (CSE) ---
+  #     # GOOGLE_CSE_API_KEY: ${GOOGLE_CSE_API_KEY}
+  #     # GOOGLE_CSE_ENGINE_ID: ${GOOGLE_CSE_ENGINE_ID}
+  #     # Disable due to Open WebUI’s RAG vectorization bug:
+  #     ENABLE_RAG_WEB_SEARCH: true
+  #     ENABLE_RAG_WEB_LOADER: false
+
+  #     ## --RAG Embedding Settings ---
+  #     # RAG embedding/reranking intentionally disabled -- known Open WebUI
+  #     # vectorization bug. Re-enable only after testing.
+  #     RAG_EMBEDDING_ENGINE: ""
+  #     RAG_EMBEDDING_MODEL: ""
+  #     RAG_RERANKING_MODEL: ""
+  #     USE_EMBEDDING_MODEL_DOCKER: ""
+  #     USE_RERANKING_MODEL_DOCKER: ""
+  #     AUXILIARY_EMBEDDING_MODEL: ""
+  #     USE_AUXILIARY_EMBEDDING_MODEL_DOCKER: ""
+
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /var/ollama_stack/open-webui/:/app/backend/data
+  #   deploy:
+  #     replicas: 1
+  #     restart_policy:
+  #       condition: on-failure
+  #     resources:
+  #       limits:
+  #         cpus: "8.0"
+  #         memory: 8G
+  #       reservations:
+  #         cpus: "2.0"
+  #         memory: 4G
+
+  # nginx:
+  #   image: nginx:stable
+  #   networks:
+  #     - ollama_net
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"
+  #   environment:
+  #     - TZ=America/Los_Angeles
+  #   volumes:
+  #     # Nginx config
+  #     - /home/midtier/ollama-stack/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
+  #     # Nginx html files
+  #     - /mnt/d/ollama_stack/nginx:/usr/share/nginx/html
+  #   deploy:
+  #     replicas: 1
+  #     restart_policy:
+  #       condition: on-failure
+
+# networks:
+#   ollama_net:
+#     external: true
+
