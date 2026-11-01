@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wsl -d ollamaDevVm -- bash -c '/opt/open-webui/venv/bin/open-webui --help 2>&1 | head -25 && echo \"--- pip show ---\" && /opt/open-webui/venv/bin/pip show open-webui 2>&1 | head -8')"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+# /etc/systemd/system/ollama-warmup.service
+#
+# Oneshot that preloads two warm models after ollama.service is healthy.
+# Idempotent: `ollama run --keepalive` against an already-loaded model is a
+# cheap no-op. Failures (missing model tag, etc.) surface in `journalctl -u
+# ollama-warmup` but do not block boot or restart ollama.service.
+#
+# The 1440m keepalive (24h) pins these two models past the default 30m idle
+# eviction set in ollama.service.d/override.conf, while letting other models
+# load on demand and evict normally.
+
+[Unit]
+Description=Preload warm Ollama models
+After=ollama.service
+Wants=ollama.service
+Requires=ollama.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=ollama
+Group=ollama
+Environment="OLLAMA_HOST=127.0.0.1:11434"
+
+# Wait briefly for ollama.service to start accepting requests.
+ExecStartPre=/bin/bash -c 'for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/tags >/dev/null && exit 0; sleep 1; done; echo "ollama API did not become ready" >&2; exit 1'
+
+# Preload models. Add or remove lines to change what's warm at boot.
+# Three warm models (matched to OLLAMA_MAX_LOADED_MODELS=3 in the override):
+#   - mistral:7b      Main chat model for Q&A with web search context.
+#   - deepseek-r1:8b  Reasoning model for math / complex prompts.
+#   - llama3.2:3b     Task model -- Open WebUI uses it for title/tag/query
+#                     rewrites set via task.model.default in webui.db. Keeping
+#                     it warm prevents eviction thrash on every chat turn.
+ExecStart=/usr/local/bin/ollama run mistral:7b --keepalive 1440m ""
+ExecStart=/usr/local/bin/ollama run deepseek-r1:8b --keepalive 1440m ""
+ExecStart=/usr/local/bin/ollama run llama3.2:3b --keepalive 1440m ""
+
+# Don't fail the whole unit if one model fails to load.
+SuccessExitStatus=0 1
+
+[Install]
+WantedBy=multi-user.target
