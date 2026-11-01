@@ -484,3 +484,9 @@ https://ollama.com/api/tags?ts=1778722790
 ```bash
 nodeType=$(docker node inspect self | jq .[].Spec.Role | tr -d '"')
 ```
+
+# To expose Open WebUI to the Windows host and make it accessible from our LAN, a port forwarding rule is needed.
+# Use Windows Host Firewall Rule + Port Forwarding (Most Robust)
+# If WSL2 IP isn't accessible from Windows, create a Windows firewall rule:
+# Run as Administrator in PowerShell
+netsh interface portproxy add v4tov4 listenport=8080 listenaddress=0.0.0.0 connectport=8080 connectaddress=172.17.36.111
