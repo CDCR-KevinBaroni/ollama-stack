@@ -61,7 +61,7 @@ services:
       ## --Backend wiring ---
       OLLAMA_BASE_URL: "http://192.168.88.104:51434"
       ENABLE_OLLAMA_API: "true"
-      DEFAULT_MODEL: "gpt-oss:20b"
+      DEFAULT_MODEL: "llama3.2:3b"
       # DATA_DIR: "/var/lib/open-webui"
 
       ## CORS (loopback-only; widen if you front this with nginx on a different host)
